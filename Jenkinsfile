@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-repo/nodejs-app.git'
+                git branch: 'main', url: https://github.com/NainaGhosh01/nodejs-ci-cd-pipeline'
             }
         }
 
