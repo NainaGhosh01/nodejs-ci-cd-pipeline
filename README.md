@@ -3,11 +3,11 @@
 This project demonstrates a complete CI/CD pipeline for deploying a Node.js application using Jenkins, Docker, and Kubernetes. The pipeline automates the process of building, testing, creating Docker images, and deploying them to a Kubernetes cluster.
 
 🛠️ Tools & Technologies Used
-•	Jenkins: For Continuous Integration (CI) to automate the build and testing process.
-•	Docker: For containerizing the Node.js application and deploying it to Kubernetes.
-•	Kubernetes: For orchestrating the deployment of the Node.js application.
-•	Slack: For sending notifications on pipeline success or failure.
-•	GitHub: For source code version control.
+1. Jenkins: For Continuous Integration (CI) to automate the build and testing process.
+2. Docker: For containerizing the Node.js application and deploying it to Kubernetes.
+3. Kubernetes: For orchestrating the deployment of the Node.js application.
+4.	Slack: For sending notifications on pipeline success or failure.
+5.	GitHub: For source code version control.
 
 📋 Prerequisites
 Before you begin, ensure you have the following:
