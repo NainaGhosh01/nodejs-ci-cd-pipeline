@@ -1,6 +1,7 @@
 # CI/CD Pipeline for Node.js Application with Jenkins, Docker, and Kubernetes
 
 This project demonstrates a complete CI/CD pipeline for deploying a Node.js application using Jenkins, Docker, and Kubernetes. The pipeline automates the process of building, testing, creating Docker images, and deploying them to a Kubernetes cluster.
+
 🛠️ Tools & Technologies Used
 •	Jenkins: For Continuous Integration (CI) to automate the build and testing process.
 •	Docker: For containerizing the Node.js application and deploying it to Kubernetes.
@@ -51,8 +52,10 @@ dockerImage.push("latest")
 }
 
 6)	Deploy to Kubernetes
-The pipeline generates a dynamic Kubernetes deployment YAML file for the application and applies it to the Kubernetes cluster. It ensures the application is deployed with two replicas:
+The pipeline generates a dynamic Kubernetes deployment YAML file for the application and applies it to the Kubernetes cluster.
+It ensures the application is deployed with two replicas:
 writeFile file: 'k8s-deployment.yaml', text:
+
 """
 apiVersion: apps/v1
 kind: Deployment
@@ -73,6 +76,7 @@ containers:
 image: ${appRegistry}:latest
 ports:
 -	containerPort: 3000
+  
 ---
 apiVersion: v1
 kind: Service
@@ -87,6 +91,7 @@ port: 80
 targetPort: 3000
 type: LoadBalancer
 """
+
 sh """
 export KUBECONFIG=${kubeConfig}
 kubectl apply -f k8s-deployment.yaml
