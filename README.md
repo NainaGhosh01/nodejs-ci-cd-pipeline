@@ -104,27 +104,4 @@ The pipeline sends notifications to a Slack channel on the success or failure of
 The workspace is cleaned up after each build to ensure no unnecessary files are left behind:
 cleanWs()
 
-📝 Setup Instructions
-1.	Clone the Repository:
-     -git clone https://github.com/NainaGhosh01/nodejs-ci-cd-pipeline
-     -cd nodejs-app
-2.	Set Up Jenkins:
-     -Install Jenkins with the necessary plugins: Git, Pipeline, Docker, Slack Notification.
-     -Create Jenkins credentials for Docker Hub, Kubernetes kubeconfig, and Slack webhook.
-3.	Configure Kubernetes Cluster:
-     -Ensure your Kubernetes cluster is set up and accessible from Jenkins.
-     -Install kubectl and configure it with the necessary credentials.
-4.	Set Up Slack Notifications:
-     -Create a Slack Webhook URL and configure it in Jenkins credentials as slack-webhook-url.
-5.	Configure the Pipeline:
-     -Set the GitHub repository URL in the Jenkinsfile.
-     -Set up Docker Hub credentials and Kubernetes kubeconfig.
-6.	Run the Pipeline:
-     -Trigger the pipeline manually or set up a webhook to trigger on code push.
-  	
-🔧 How to Run Locally (Optional)
-To test this pipeline locally with Docker and Kubernetes, follow these steps:
-1)	Build the Docker image: docker build -t your-dockerhub-username/nodejs-app:latest .
-2)	Push to DockerHub: docker push your-dockerhub-username/nodejs-app:latest
-3)	Deploy to Kubernetes: kubectl apply -f k8s-deployment.yaml
 
