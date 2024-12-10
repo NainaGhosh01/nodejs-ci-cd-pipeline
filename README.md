@@ -1,107 +1,197 @@
-# CI/CD Pipeline for Node.js Application with Jenkins, Docker, and Kubernetes
 
-This project demonstrates a complete CI/CD pipeline for deploying a Node.js application using Jenkins, Docker, and Kubernetes. The pipeline automates the process of building, testing, creating Docker images, and deploying them to a Kubernetes cluster.
+# CI/CD Pipeline for Node.js Application
 
-🛠️ Tools & Technologies Used
-1. Jenkins: For Continuous Integration (CI) to automate the build and testing process.
-2. Docker: For containerizing the Node.js application and deploying it to Kubernetes.
-3. Kubernetes: For orchestrating the deployment of the Node.js application.
-4.	Slack: For sending notifications on pipeline success or failure.
-5.	GitHub: For source code version control.
+Overview
 
-📋 Prerequisites
-Before you begin, ensure you have the following:
-1.	Jenkins installed with necessary plugins: Git, Pipeline, Docker, Slack Notification.
-2.	A Docker Hub account and Docker Hub credentials in Jenkins for pushing Docker images.
-3.	A Kubernetes cluster with kubectl configured to interact with the cluster.
-4.	A Slack account and webhook URL configured in Jenkins for notifications.
-5.	A GitHub repository containing the Node.js application.
-   
-🚀 How It Works
-This CI/CD pipeline automatically:
-1.	Checks out the latest code from the GitHub repository.
-2.	Installs dependencies using npm install.
-3.	Runs unit tests with npm test, sending notifications if tests fail.
-4.	Builds a Docker image for the application.
-5.	Pushes the Docker image to Docker Hub.
-6.	Deploys the application to a Kubernetes cluster using a dynamic deployment YAML file.
-7.	Sends Slack notifications on pipeline success or failure.
-   
-📋 Breakdown of Pipeline Stages
-1)	Checkout Code
-This stage pulls the latest code from the main branch of your GitHub repository:
-git branch: 'main', url: 'https://github.com/NainaGhosh01/nodejs-ci-cd-pipeline'
+This repository demonstrates a Continuous Integration and Continuous Deployment (CI/CD) pipeline for a Node.js application. The pipeline is implemented using Jenkins and integrates with Docker and Kubernetes to automate testing, building, and deploying the application.
 
-2)	Install Dependencies
-The pipeline installs the necessary dependencies using npm:
-sh 'npm install'
 
-3)	Run Tests
-This stage runs unit tests using npm test. If the tests fail, it sends a Slack notification and aborts the pipeline:
-sh 'npm test'
 
-4)	Build Docker Image
-The pipeline builds a Docker image for the application with a unique version tag based on the build number: 
-dockerImage = docker.build("${appRegistry}:${env.BUILD_NUMBER}")
+## Features
 
-5)	Push Docker Image
-This stage pushes the built Docker image to Docker Hub:
-docker.withRegistry('', registryCredential) {
-dockerImage.push("${env.BUILD_NUMBER}")
-dockerImage.push("latest")
+- Automated Testing: Runs tests on every pull request to ensure code quality.
+- Docker Image Build: Packages the application into a Docker image.
+- Kubernetes Deployment: Deploys the Docker image to a Kubernetes cluster.
+- Notifications: Sends success or failure notifications.
+
+
+
+## Architecture
+- Source Control: GitHub repository to manage the Node.js application's source code.
+- CI/CD Pipeline: 
+    - Runs tests using npm test.
+     - Builds and pushes a Docker image to Docker Hub.
+     - Deploys the image to Kubernetes using kubectl.
+- Deployment Target: Kubernetes cluster.
+## Prerequisites
+To run this project, ensure the following are set up:
+
+- Jenkins:
+   Installed on a server or accessible through Jenkins Cloud.
+   Plugins:
+   - Pipeline
+   - Docker Pipeline
+   - Kubernetes CLI
+   - Slack Notification (optional)
+- Docker Hub:
+  Account and credentials to push the Docker image.
+- Kubernetes Cluster:
+  Access to a cluster configured with kubectl.
+- GitHub Repository:
+   Webhooks enabled to trigger Jenkins jobs on pull requests.
+## Pipeline Workflow
+Stages
+- Checkout Code: Clones the repository from the main branch.
+- Install Dependencies: Runs npm install to install required packages.
+- Run Tests: Executes npm test to verify application functionality.
+- Build Docker Image: Creates a Docker image and pushes it to Docker Hub.
+- Deploy to Kubernetes: 
+    - Applies k8s/deployment.yaml and k8s/service.yaml to deploy the application.
+- Post-Deployment: Sends notifications for success or failure.
+
+## Jenkinsfile
+
+Here’s the pipeline script used in Jenkins:
+
+pipeline {
+    
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "your-docker-repo/nodejs-app:latest"
+        KUBE_CONFIG = credentials('kubeconfig-credential-id') // Kubernetes config credential
+        DOCKER_CREDENTIALS = credentials('docker-credentials-id') // Docker Hub credentials
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-repo/nodejs-app.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
+                        sh "docker build -t ${DOCKER_IMAGE} ."
+                        sh "docker push ${DOCKER_IMAGE}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    withKubeConfig(credentialsId: 'kubeconfig-credential-id') {
+                        sh '''
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment succeeded!'
+            // Notify via Slack or Email
+        }
+        failure {
+            echo 'Deployment failed!'
+            // Notify via Slack or Email
+        }
+    }
 }
 
-6)	Deploy to Kubernetes
-The pipeline generates a dynamic Kubernetes deployment YAML file for the application and applies it to the Kubernetes cluster.
-It ensures the application is deployed with two replicas:
-writeFile file: 'k8s-deployment.yaml', text:
+## Kubernetes Deployment Files
 
-"""
+k8s/deployment.yaml
+
+```bash
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-name: nodejs-app
+  name: nodejs-app
 spec:
-replicas: 2
-selector:
-matchLabels:
-app: nodejs-app
-template:
-metadata:
-labels:
-app: nodejs-app
-spec:
-containers:
--	name: nodejs-container
-image: ${appRegistry}:latest
-ports:
--	containerPort: 3000
-  
----
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+    spec:
+      containers:
+      - name: nodejs-app
+        image: your-docker-repo/nodejs-app:latest
+        ports:
+        - containerPort: 3000
+
+```
+k8s/service.yaml
+
+```bash
 apiVersion: v1
 kind: Service
 metadata:
-name: nodejs-app-service
+  name: nodejs-app-service
 spec:
-selector:
-app: nodejs-app
-ports:
--	protocol: TCP
-port: 80
-targetPort: 3000
-type: LoadBalancer
-"""
+  selector:
+    app: nodejs-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+```
+## How to use
 
-sh """
-export KUBECONFIG=${kubeConfig}
-kubectl apply -f k8s-deployment.yaml
-"""
+1) Fork or Clone the Repository:
 
-7)	Slack Notifications
-The pipeline sends notifications to a Slack channel on the success or failure of the deployment: slackSend channel: '#deployments', color: '#36a64f', message: message, webhookToken: slackWebhook
+```bash
+git clone https://github.com/your-username/nodejs-app-ci-cd.git
+cd nodejs-app-ci-cd
+```
 
-8)	Cleanup Workspace
-The workspace is cleaned up after each build to ensure no unnecessary files are left behind:
-cleanWs()
+2) Set Up Jenkins:
+
+- Create a Jenkins pipeline job.
+- Link the repository to the pipeline.
+- Add necessary credentials (Docker, Kubernetes). my-project
 
 
+3) Configure Kubernetes:
+
+- Apply the YAML files in the k8s/ directory to your Kubernetes cluster:
+```bash
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+4) Trigger the Pipeline:
+- Push changes or create a pull request to trigger the pipeline.
+
+
+
+## Notifications
+Configure notifications for deployment success or failure:
+
+- Slack: Add Slack Notification Plugin in Jenkins and configure the webhook URL.
+- Email: Add Email Notification settings in Jenkins.
