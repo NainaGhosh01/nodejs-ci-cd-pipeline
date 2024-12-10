@@ -54,8 +54,8 @@ Stages
 1) Fork or Clone the Repository:
 
 ```bash
-git clone https://github.com/your-username/nodejs-app-ci-cd.git
-cd nodejs-app-ci-cd
+git clone https://github.com/NainaGhosh01/nodejs-ci-cd-pipeline.git
+cd nodejs-ci-cd-pipeline
 ```
 
 2) Set Up Jenkins:
